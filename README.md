@@ -332,6 +332,7 @@ For documentation on the latest development code see the [documentation index][d
 * [stackdriver](./plugins/inputs/stackdriver) (Google Cloud Monitoring)
 * [sql](./plugins/outputs/sql) (SQL generic output)
 * [statsd](./plugins/inputs/statsd)
+* [supervisor](./plugins/inputs/supervisor)
 * [suricata](./plugins/inputs/suricata)
 * [swap](./plugins/inputs/swap)
 * [synproxy](./plugins/inputs/synproxy)
