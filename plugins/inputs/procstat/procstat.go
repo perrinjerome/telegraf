@@ -24,19 +24,20 @@ var (
 type PID int32
 
 type Procstat struct {
-	PidFinder   string `toml:"pid_finder"`
-	PidFile     string `toml:"pid_file"`
-	Exe         string
-	Pattern     string
-	Prefix      string
-	CmdLineTag  bool `toml:"cmdline_tag"`
-	ProcessName string
-	User        string
-	SystemdUnit string
-	CGroup      string `toml:"cgroup"`
-	PidTag      bool
-	WinService  string `toml:"win_service"`
-	Mode        string
+	PidFinder      string `toml:"pid_finder"`
+	PidFile        string `toml:"pid_file"`
+	Exe            string
+	Pattern        string
+	Prefix         string
+	CmdLineTag     bool `toml:"cmdline_tag"`
+	ProcessName    string
+	User           string
+	SystemdUnit    string
+	CGroup         string `toml:"cgroup"`
+	PidTag         bool
+	WinService     string `toml:"win_service"`
+	SupervisordUrl string `toml:"supervisord_url"`
+	Mode           string
 
 	solarisMode bool
 
@@ -60,6 +61,8 @@ var sampleConfig = `
   # systemd_unit = "nginx.service"
   ## CGroup name or path
   # cgroup = "systemd/system.slice/nginx.service"
+  ## URL of supervisord control socket (use unix:///path/to/socket/RPC2 for unix socket)
+  supervisord_url = http://localhost:9001/RPC2
 
   ## Windows service name
   # win_service = ""
@@ -398,8 +401,11 @@ func (p *Procstat) findPids() ([]PID, map[string]string, error) {
 	} else if p.WinService != "" {
 		pids, err = p.winServicePIDs()
 		tags = map[string]string{"win_service": p.WinService}
+	} else if p.SupervisordUrl != "" {
+		pids, err = p.supervisordPIDs()
+		tags = map[string]string{"supervisord_url": p.SupervisordUrl}
 	} else {
-		err = fmt.Errorf("either exe, pid_file, user, pattern, systemd_unit, cgroup, or win_service must be specified")
+		err = fmt.Errorf("either exe, pid_file, user, pattern, systemd_unit, cgroup, win_service or supervisord_url must be specified")
 	}
 
 	return pids, tags, err
@@ -461,10 +467,27 @@ func (p *Procstat) cgroupPIDs() ([]PID, error) {
 	return pids, nil
 }
 
+func queryPidWithSupervisord(s string) (PID, error) {
+	return PID(0), fmt.Errorf("not implemented")
+}
+
 func (p *Procstat) winServicePIDs() ([]PID, error) {
 	var pids []PID
 
 	pid, err := queryPidWithWinServiceName(p.WinService)
+	if err != nil {
+		return pids, err
+	}
+
+	pids = append(pids, PID(pid))
+
+	return pids, nil
+}
+
+func (p *Procstat) supervisordPIDs() ([]PID, error) {
+	var pids []PID
+
+	pid, err := queryPidWithSupervisord(p.SupervisordUrl)
 	if err != nil {
 		return pids, err
 	}
