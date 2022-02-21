@@ -139,7 +139,7 @@ jobs:
             - '/usr/local/bin/go'
             - '/usr/local/bin/gofmt'
       - run: 'make deps'
-      - run: 'make tidy'
+      - run: 'echo make tidy'
       - run: 'make'
       - run: 'make check'
       - run: 'make test'
